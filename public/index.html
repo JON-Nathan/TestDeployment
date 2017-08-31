@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html ng-app="buzz">
+	<head>
+		<title>Buzz Dashboard</title>
+		<script src="./jquery-2.1.3.min.js"></script>
+		<link rel="stylesheet" href="./bootstrap-3.3.4-dist/css/bootstrap.min.css">
+		<script src="./bootstrap-3.3.4-dist/js/bootstrap.min.js"></script>
+		
+		<style>
+			/* You can add global styles to this file, and also import other style files */
+/* You can add global styles to this file, and also import other style files */
+
+div.loader {
+    position: absolute;
+    width: 50%;
+    left: 45%;
+    top: 45%;
+    font-family: "Droid Sans Georgian";
+    font-size: 200%;
+    color: chocolate;
+}
+
+#side
+{
+    position: absolute;
+    border-radius: 0%;
+    width: 18%;
+    height: 90%;
+    left: 1%;
+    top: 10%;
+    font-size: 150%;
+}
+
+#subs
+{
+    position: absolute;
+    border-radius: 0%;
+    width: 30%;
+    height: 20%;
+    left: 19%;
+    top: 80%;
+}
+
+#sibb
+{
+    position: absolute;
+    border-radius: 0%;
+    width: 30%;
+    height: 45%;
+    left: 19%;
+    top: 10%;
+}
+
+#recent
+{
+    position: absolute;
+    border-radius: 0%;
+    width: 30%;
+    height: 25%;
+    left: 19%;
+    top: 55%;
+}
+
+#message
+{
+    position: absolute;
+    border-radius: 0%;
+    width: 50%;
+    height: 45%;
+    left: 49%;
+    top: 10%;
+}
+
+#comments
+{
+    position: absolute;
+    border-radius: 0%;
+    width: 50%;
+    height: 45%;
+    left: 49%;
+    top: 55%;
+}
+
+#stat
+{
+    position: absolute;
+    border-radius: 0%;
+    width: 98%;
+    height: 40%;
+    left: 1%;
+    top: 101%;
+}
+
+		</style>
+		
+		<script type="text/javascript" src="angular/angular.min.js"></script>
+		<script>
+			var app=angular.module('buzz',[]);
+			/*app.config(['$qProvider',function($qProvider){
+				$qProvider.errorOnUnhandledRejections(false);
+			}]);*/
+			app.controller('pop_posts',function($scope,$http){
+				
+				$scope.getContent=function(postid)
+				{
+					$http.get('/getContent/'+postid).then(function(res){
+						//console.log("here"+res.data.content);
+						$scope.post_content=res.data.content;
+						$scope.posts_timestamp=res.data.timestamp;
+						$scope.post_studentNumber=res.data.studentID;
+						$scope.post_id=postid;
+					});
+					$http.get('/getChildPosts/'+postid).then(function(res){
+						if(res.data.status)
+						{
+							console.log("here  "+res.data.data);
+							$scope.children=res.data.data;
+							//$scope.getContent(post.postID);
+						}
+						else
+						{
+							console.log(res.data.text);
+						}
+					});
+				};
+				$scope.translate=function(post){
+					$scope.relatedPosts=$scope.children;
+					$scope.getContent(post.postID);
+					
+				};
+				$scope.getPostHie=function()
+				{
+					$http.get('/getAllPosts/COS101').then(function(res){
+						if(res.data.status)
+						{
+							$scope.postHie=res.data.data;
+							console.log(res.data.data);
+						}
+						else
+						{
+							console.log(res.text);
+						}
+					});
+					setInterval($scope.getRecentPosts,5000);
+				};
+				$scope.clickedParent=function(post)
+				{
+					$http.get('/getChildPosts/'+post.postID).then(function(res){
+						if(res.data.status)
+						{
+							console.log("here  "+res.data.data);
+							$scope.relatedPost=res.data.data;
+							//$scope.getContent(post.postID);
+						}
+						else
+						{
+							console.log(res.data.text);
+						}
+					});
+				};
+				$scope.getRecentPosts=function()
+				{
+					$http.get('/getRecentPosts/COS101').then(function(res){
+						if(res.status)
+						{
+							$scope.recentPosts=res.data.data;
+						}
+						else
+						{
+							console.log(res.data.text);
+						}
+					});
+				};
+				//$scope.append_post_content='hi hi';
+				$scope.appendPost=function(){
+					console.log("In append");
+						var postData={student_number:$scope.append_post_student,
+							content:$scope.append_post_content,
+							tag_list:[]
+						};
+						$http.post('/addPost/'+$scope.post_id,postData).then(function(res){
+							if(res.data.status)
+							{
+								console.log("Appended to post: "+res.data.text);
+								$scope.getContent($scope.post_id);
+								$scope.append_post_content='';
+								$scope.append_post_student='';
+							}
+						});
+				};
+			});
+		</script>
+		
+		 <script>
+
+      function drag_start(event)
+      {
+          var style = window.getComputedStyle(event.target, null);
+          var str = (parseInt(style.getPropertyValue("left")) - event.clientX) + ',' + (parseInt(style.getPropertyValue("top")) - event.clientY)+ ',' + event.target.id;
+          event.dataTransfer.setData("Text",str);
+      }
+
+      function drop(event)
+      {
+          var offset = event.dataTransfer.getData("Text").split(',');
+          var dm = document.getElementById(offset[2]);
+          dm.style.left = (event.clientX + parseInt(offset[0],10)) + 'px';
+          dm.style.top = (event.clientY + parseInt(offset[1],10)) + 'px';
+          event.preventDefault();
+          return false;
+      }
+
+      function drag_over(event)
+      {
+          event.preventDefault();
+          return false;
+      }
+      //      alert('Dance');
+  </script>
+		<!--<style>
+			.feed{
+				border: 1px solid black;
+				min-height:100%
+			}
+			.tableHead{ 
+				border: 1px solid black;
+				min-height:10px;
+			}
+			td{
+				border:1px solid #333;
+				padding: 10px;
+			}
+		</style> -->
+	</head>
+	<body ng-controller="pop_posts" ng-init="getPostHie()">
+	<nav class="navbar navbar-inverse navbar-static-top" role="navigation">
+  <div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+      <!--<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+
+      </button>
+     <!-- <a class="navbar-brand" href="#">Buzz</a>-->
+      <a href="#" class="btn btn-toolbar btn-lg" id="menuCon">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+          <span class="glyphicon glyphicon-menu-hamburger"></span>
+        </button>
+      </a>
+    </div>
+
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+      <ul class="nav navbar-nav">
+        <li class="active"><a href="#">Buzz<span class="sr-only">(current)</span></a></li>
+        <li><a href="#">Active Threads</a></li>
+        <li><a href="#">Recommended Posts</a></li>
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Bounty <span class="caret"></span></a>
+          <ul class="dropdown-menu">
+            <li><a href="#"></a></li>
+            <li><a href="#"><span class="glyphicon glyphicon-bullhorn"></span> Bounty Questions</a></li>
+            <li><a href="#"><span class="glyphicon glyphicon-ok-sign"></span> Resolved Questions</a></li>
+            <li role="separator" class="divider"></li>
+            <li><a href="#"><span class="glyphicon glyphicon-edit"></span> New Bounty Post</a></li>
+            <li role="separator" class="divider"></li>
+            <li><a href="#"><span class="glyphicon glyphicon-xbt"></span> Total claimable Bounty: 236</a></li>
+          </ul>
+        </li>
+      </ul>
+
+      <ul class="nav navbar-nav navbar-right">
+        <li><a href="#" class="lass"><span class="glyphicon glyphicon-piggy-bank"></span> {{user_bounty}}</a></li>
+        <li><a href="#" class="lass"><span class="glyphicon glyphicon-certificate"></span> {{user_points}}</a></li>
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><span class="glyphicon glyphicon-user" aria-hidden="true"></span></a>
+          <ul class="dropdown-menu">
+            <li><a href="#"><b>{{user_studentNum}}, {{user_name}}</b></a></li>
+            <li role="separator" class="divider"></li>
+            <li><a href="#"><span class="glyphicon glyphicon-comment"></span> Chats</a></li>
+            <li><a href="#"><span class="glyphicon glyphicon-bell"></span> Interactions</a></li>
+            <li><a href="#"><span class="glyphicon glyphicon-th-large"></span> My Groups</a></li>
+            <li><a href="#"><span class="glyphicon glyphicon-wrench"></span> Profile</a></li>
+            <li><a href="#"></a></li>
+            <li role="separator" class="divider"></li>
+            <li><a href="#"><span class="glyphicon glyphicon-flag"></span> Forum Help</a></li>
+            <li><a href="#"><span class="glyphicon glyphicon-cog"></span> Settings</a></li>
+            <li><a href="#"><span class="glyphicon glyphicon-off" aria-hidden="true"></span> Sign-Out</a></li>
+          </ul>
+        </li>
+      </ul>
+    </div><!-- /.navbar-collapse -->
+  </div><!-- /.container-fluid -->
+</nav>
+			<button type="button" onclick="document.getElementById('txt2').style.display = 'none'; document.getElementById('txt1').style.display = 'none'; document.getElementById('div_main').style.display = 'none'" > Create </button>
+<div ondragover="drag_over(event)" ondrop="drop(event)">
+    <!--<button onclick="document.getElementById('div_main').style.display = 'inline'">Reply</button>-->
+    <div id="div_main" style="height:100vh; width:100%; border:3px solid white; top:0px; left:0px; position: absolute; display:none">
+        <div id="" style="height:100vh; width:100%; border:3px solid white; background-color:#000; opacity: 0.4; top:0px; left:0px; position: absolute; display:none">
+        </div>
+            <div id="txt1" draggable="true" ondragstart="drag_start(event)" style="opacity:1.0; height: 300px; color: white">
+                <div class="div_dance_header" style="opacity:1.0">
+                    <button type="button" class="cancel_dance" style="color:black; opacity:1.0" onclick="document.getElementById('div_main').style.display = 'none'">&times;</button>
+                    <h3>Create Module</h3>
+                </div>
+                <br>
+                <br>
+                <div class="form-group">
+                    <label >Enter Module Name:</label><button type="button" class="btn btn-warning" style="float:right" (click)="createNewModule()" onclick="document.getElementById('div_main').style.display = 'none'">Create Module</button>
+                    <input type="text" class="form-control" style="width: 200px" [(ngModel)]="app_module">
+                </div>
+                <div class="form-group">
+                    <label for="comment">Module description:</label>
+                    <textarea class="form-control" rows="5" id="comment" [(ngModel)]="app_content"></textarea>
+                </div>
+                <br>
+            </div>
+
+        <div id="txt2" draggable="true" ondragstart="drag_start(event)" style="opacity:1.0; height: 600px;">
+            <div class="div_dance_header" style="opacity:1.0">
+                <button type="button" class="cancel_dance" style="color:black; opacity:1.0" onclick="document.getElementById('div_main').style.display = 'none'">&times;</button>
+                <h3>Create Posts</h3>
+            </div>
+            <br>
+            <br>
+            <div class="form-group">
+                <label >Module Name:</label><button type="button" class="btn btn-warning" style="float:right" (click)="createNewModule()" onclick="document.getElementById('div_main').style.display = 'none'">Create Post</button>
+                <input type="text" class="form-control" style="width: 200px" >
+                <label >Enter Heading:</label><input type="text" class="form-control" style="width: 200px" >
+            </div>
+            <div class="form-group">
+                <label for="comment">Message Content:</label>
+                <textarea class="form-control" rows="5"></textarea>
+            </div>
+            <div class="well" style="width: 90%; height: 30px; padding: 0px; margin-top: 5px; background-color: white">
+                <div *ngFor="let t of tags" style=" display: inline-flex; float: left; margin-left: 5px; margin-bottom: 10px; width: 80px; height: 30px; background-color: deepskyblue; border-radius: 8px; border: dashed 1px darkslateblue">
+                    <span style="color: white; font-size: 20px"> # </span><p contenteditable="true">{{t}}</p>
+                </div>
+                <div *ngIf="tags.length < 6" style="font-size: 20px; display: inline" (click)="tags.push('newTag')"><span class="glyphicon glyphicon-plus-sign"></span></div>
+            </div>
+            <br>
+        </div>
+    </div>
+</div>
+		<div class="row feed">
+			<div >
+			<div class="panel panel-default" id="side">
+				  <div class="panel-heading">
+				    <h3 class="panel-title">Menu</h3>
+				  </div>
+			<div class="panel-body" style="font-size: 12px; width:260px; height:100%; overflow-x:scroll; color: #333">
+					<ul class = "nav nav-pills nav-stacked" ng-repeat="_post in postHie">
+						<li><a href ng-click="clickedParent(_post);getContent(_post.postID)">{{_post.heading}}</a></li>
+					</ul>
+
+			</div>
+			
+</div>
+
+<style>
+  .divNaviItem:hover{
+    color: blue;
+    cursor: pointer;
+  }
+
+  #divNavi{
+    /*background-color: #bbb;*/
+    font-size: 14px;
+  }
+
+  .badge {
+    font-size: 8px;
+    background-color: black;
+  }
+
+  .divModule{
+    background-color: #999;
+    color: #EEE;
+    font-size: 20px;
+    padding-left: 10px;
+  }
+
+  .folder{
+    color: sandybrown;
+  }
+</style>
+			</div> 
+			<div >
+				
+				<div class="panel panel-default" id="sibb">
+  <div class="panel-heading">
+    <h3 class="panel-title">Related - Posts<span class="glyphicon glyphicon-pushpin" style="float: right" onclick="$('#x12').toggle()"></span></h3>
+  </div>
+				   <div class="panel-body"  style = "overflow-y:scroll; height: 88% " >	
+					<ul class = "nav nav-pills nav-stacked" ng-repeat="_post in relatedPost">
+						<li><a href ng-click="getContent(_post.postID)">{{_post.heading}}</a></li>
+					</ul>
+				 </div>
+	</div>
+<style>
+
+  .siblingOption:hover{
+    color: blue;
+    cursor: pointer;
+  }
+</style>
+
+<div class="panel panel-default" id="recent">
+  <div class="panel-heading">
+    <h3 class="panel-title">Recent Posts <span class="glyphicon glyphicon-pushpin" style="float: right" onclick="$('#x11').toggle()"></span></h3>
+  </div>
+  <div class="panel-body" id="x11" style = "overflow-y:scroll;  height: 83%">
+				<table>
+					<ul class = "nav nav-pills nav-stacked" ng-repeat="_post in recentPosts">
+						<li >
+							<a href ng-click="clickedParent(_post);getContent(_post.postID)">{{_post.heading}}</a>
+						</li>
+					</ul>
+				</table>
+  </div>
+</div>
+
+			</div>
+			<div >
+			<div class="panel panel-default" id="message">
+  <div class = "panel-heading"> 
+  <h3 class = "panel-title"> Messages</h3>
+	
+  </div>
+				<table>
+					<tr>
+						{{post_content}}<br><br>
+						{{post_studentNumber}}<br><br>
+						{{post_timestamp}}<br><br>
+					</tr>
+				</table>
+			
+				
+	</div>
+	<div class="panel panel-default" id="comments">
+  <div class="panel-heading">
+    <h3 class="panel-title">Responses</h3>
+  </div >
+			<div class="panel-body" style = "overflow-y:scroll;  height: 83%">
+					<ul class = "nav nav-pills nav-stacked" ng-repeat="_post in children" ng-if="children.length>0">
+						<li><a href ng-click="clickedParent(_post);getContent(_post.postID)">{{_post.heading}}</a></li>
+					</ul>
+					
+			</div>
+</div>
+				
+			</div>
+		</div>
+	</body>
+</html>

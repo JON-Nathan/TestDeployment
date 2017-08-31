@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html ng-app="buzz">
+	<head>
+		<title>Buzz Dashboard</title>
+		<script src="./jquery-2.1.3.min.js"></script>
+		<link rel="stylesheet" href="./bootstrap-3.3.4-dist/css/bootstrap.min.css">
+		<script src="./bootstrap-3.3.4-dist/js/bootstrap.min.js"></script>
+		
+		<script type="text/javascript" src="angular/angular.min.js"></script>
+		<script>
+			var app=angular.module('buzz',[]);
+			app.config(['$qProvider',function($qProvider){
+				$qProvider.errorOnUnhandledRejections(false);
+			}]);
+			app.controller('pop_posts',function($scope,$http){
+				
+				$scope.getContent=function(postid)
+				{
+					$http.get('/getContent/'+postid).then(function(res){
+						console.log(res);
+						$scope.post_content=res.content;
+						$scope.posts_timestamp=res.timestamp;
+						$scope.post_studentNumber=res.studentID;
+					});
+				};
+				$scope.getPostHie=function()
+				{
+					$http.get('/getAllPosts/COS101').then(function(res){
+						if(res.status)
+						{
+							$scope.postHie=res.data;
+						}
+						else
+						{
+							console.log(res.text);
+						}
+					});
+				};
+				$scope.clickedParent=function(post)
+				{
+					$http.get('/getChildPosts/'+post.postID).then(function(res){
+						if(res.status)
+						{
+							$scope.relatedPost=res.data;
+						}
+						else
+						{
+							console.log(res.text);
+						}
+					});
+					$scope.getContent(post.postID);
+				};
+				$scope.getRecentPosts=function()
+				{
+					$http.get('/getRecentPosts/COS101').then(function(res){
+						if(res.status)
+						{
+							$scope.recentPosts=res.data;
+						}
+						else
+						{
+							console.log(res.text);
+						}
+					});
+				};
+			});
+		</script>
+		<style>
+			.feed{
+				border: 1px solid black;
+				min-height:100%
+			}
+			.tableHead{ 
+				border: 1px solid black;
+				min-height:10px;
+			}
+			td{
+				border:1px solid #333;
+				padding: 10px;
+			}
+		</style>
+	</head>
+	<body ng-controller="pop_posts" ng-init="getPostHie()">
+		<ul class="nav nav-pills">
+			<li class="active"><a href>Home</a></li>
+		</ul>
+		<div class="row feed">
+			<div class="col-md-3">
+				<table>
+					<th>Posts</th>
+					<tr ng-repeat="_post in postHie">
+						<td><a href ng-click="clickedParent(_post)">{{_post.heading}}</a></td>
+					</tr>
+				</table>
+			</div> 
+			<div class="col-md-3">
+				<table>
+					<th>Related posts</th>
+					<tr ng-repeat="_post in relatedPost">
+						<td><a href ng-click="getContent(_post.postID)">{{_post.heading}}</a></td>
+					</tr>
+				</table>
+				<table>
+					<th>Recent Posts</th>
+					<tr ng-repeat="_post in recentPosts">
+						<td><a href ng-click="getContent(_post.postID)">{{_post.heading}}</a></td>
+					</tr>
+				</table>
+			</div>
+			<div class="col-md-6">
+				<table>
+					<th>Messages</th>
+					<tr>
+						{{post_content}}<br><br>
+						{{post_studentNumber}}<br><br>
+						{{post_timestamp}}<br><br>
+					</tr>
+				</table>
+			</div>
+		</div>
+	</body>
+</html>
