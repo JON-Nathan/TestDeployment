@@ -62,9 +62,9 @@ var Post_module = new mongoose.Schema({
    }
 });
 
-mongoose.model('postModule', Post_module);
+mongoose.model('postmodules', Post_module);
 
-var Posts = mongoose.model('postModule', Post_module);
+var Posts = mongoose.model('postmodules', Post_module);
 var express = require('express');
 var router = express.Router();
 var app = express();
