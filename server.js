@@ -71,6 +71,7 @@ var app = express();
 var server = require('http').createServer(app);
 var io = require('socket.io')(server);
 var _ =require("lodash");
+const port = process.env.PORT;
 
 app.use(express.static(__dirname + '/public')); // I am not to sure about this line
 
@@ -791,8 +792,8 @@ app.get('/getContent/:postID',function(req,res,next){
 	}
 });
 
-app.get('/', function(req, res) {
+/*app.get('/', function(req, res) {
 	res.sendFile(__dirname + '/public/index.html');
-});
+});*/
 
-app.listen(3000, ()=> console.log("Server running at 3000"))
+app.listen(port, ()=> console.log("Server running at: " + port))
