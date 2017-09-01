@@ -759,7 +759,7 @@ app.get('/getContent/:postID',function(req,res,next){
 					"status":true,
 					"content":post.content,
 					"text":"FOund the post",
-					"timestamp":post.timestamp.getDate()+"/"+(post.timestamp.getMonth()+1)+"/"+post.timestamp.getYear(),
+					"timestamp":post.timestamp.toLocaleDateString("en-GB"),
 					"studentID":post.student_number,
 					"heading":post.heading
 				});
